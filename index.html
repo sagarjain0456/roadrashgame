@@ -1,0 +1,345 @@
+<!doctype html>
+<html>
+<head>
+<title> GAME</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0; padding:0; font-family: 'Josefin Sans', sans-serif;}
+.hide{ display:none;}
+
+.carGame{
+    width: 100%;
+    height:100vh;
+    background-image: url('gamebg1.jpg');
+    background-repeat: no- repeat;
+    background-size: 100% 100%;
+}
+
+.car, .enemy{
+    width:50px; height:80px; background: red;
+    position: absolute;
+    /* left: 350px; top: 120px; */
+    bottom: 120px; /* as we need our cas to be at the bottom in the beginning of the game*/ /*now we will use loops so that multiple road lines can come */
+    background-image: url('car5.jpg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    } 
+
+/* giving css to lines */
+
+.lines{
+    width:10px;
+    height: 100px;
+    background-color: white;
+    position:absolute;
+    margin-left: 195px; /*so that road line can come in the center and 195 as we know the width of the road is 400px and the width of the line itself is 10px*/
+
+}
+
+
+
+    /* Making Road of the game */
+    .gameArea{
+        width:400px;
+        height: 100vh;
+        background: #2d3436;
+        margin:auto; /* It will bring the road to the center as the road width is already given*/
+       position: relative; /* to bring the cas on the road*/
+     overflow:hidden;   
+     border-right: 7px dashed #c8d6e5;
+     border-left: 7px dashed #c8d6e5;
+    }
+
+    .score{  /* To style the score which is displayed on the top left side of the screen */
+        position: absolute;
+        top: 15px;
+        left: 40px;
+        background: #10ac84;
+        width: 300px;
+        /* height: 70px; */
+        line-height: 70px; /* to get the score vertically align in the center of the box */
+        text-align: center;
+        color: white;
+        font-size: 1.5 em;
+        box-shadow: 0 5px 5px #777;
+ }
+
+ .startScreen{
+     position: absolute;
+     background-color: #ee5253;
+     left: 50%;                          /* to center the div inside the div */
+     top: 50%;
+     transform: translate(-50%, -50%);
+     color:white;
+     z-index: 1;  /*So that the startScreen can be on the top of the screen and be visible to us rather hiding behind the game*/
+     text-align: center;
+     border: 1px solid #ff6b6b;
+     padding: 15px;
+     margin: auto;
+     width: 50%;
+     cursor: pointer;
+     letter-spacing: 5;
+     font-size: 20px;
+     word-spacing: 3;
+     line-height:30px;
+     text-transform: uppercase;
+     box-shadow: 0 5px 5px #777;
+
+ }
+</style>
+</head>
+<body>
+
+<div class="carGame">
+<div class="score"> </div>
+<div class="startScreen">
+<p> Press here to start <br>
+Arrow keys to move <br>
+If you hit another car you will lose.
+</p>
+</div>
+<div class="gameArea "> </div>
+</div>
+
+<script>
+ const score = document.querySelector('.score');
+ const startScreen = document.querySelector('.startScreen');
+ const gameArea = document.querySelector('.gameArea');
+
+//  console.log(score);
+//   console.log(startScreen);
+    console.log(gameArea);
+
+    startScreen.addEventListener('click', start);    /*When someone click on it we are involing or calling an call back function whose name is start*/
+   let player = { speed : 5, score: 0 }; /* we are creating an empty obeject whose name is player for the players assurity*/
+   
+    /* In short the above thing means  that we will start the
+    game once we click on that small rectangular screen which have game's instructions written on it*/
+  let keys = { ArrowUp:false, ArrowDown:false, ArrowLeft:false,ArrowRight:false}
+    document.addEventListener('keydown', keyDown); /*Whenever the player presses the down key(keydown) of the keyboard then the call back function named keyDown will be invoked or being called.*/
+    document.addEventListener('keyup', keyUp);  /*Whenever the player presses the up key(keyup) of the keyboard then the call back function named keyUp will be invoked or being called.*/
+     
+    /*Now we have to find out which key is pressed by the user so, in earlier line we have invoked the function but now we will define the function*/
+     function keyDown(e){ /* Passing parameter as 'e' so as to prevent the default functionality of javascript*/
+         e.preventDefault();
+         keys[e.key]=true;
+        //  console.log(e.key);
+        //  console.log(keys);
+     }
+
+
+     function keyUp(e){ /* Passing parameter as 'e' so as to prevent the default functionality of javascript*/
+         e.preventDefault();
+         keys[e.key]=false;
+        //  console.log(e.key) ;
+         console.log(keys);
+        
+     }
+   function isCollide(a,b){  /* a and b are two parameters in which 'a' represent our or players car and the 'b' represent enemies cars */
+       aRect = a.getBoundingClientRect(); /* aRect is an obeject which is representing our or players car and with the help of a.getBoundingClientRect we are getting the position of player's car  */
+       bRect = b.getBoundingClientRect();  /* bRect is an obeject which is representing enemies cars and with the help of b.getBoundingClientRect we are getting the position of enemy's car  */
+ 
+       return! ((aRect.bottom < bRect.top) || (aRect.top > bRect.bottom) || (aRect.right < bRect.left) || (aRect.left > bRect.right)) /* We are checking the condition for players and enemies car collision*/
+     /* after mentioning the collision condition we need to mention this or call this above condition in the moveEnemy function   */
+
+
+   }
+
+     
+    //    Defining the function moveLines
+    // Now we want our road lines to move
+     function moveLines(){
+          let lines= document.querySelectorAll('.lines');  /* As we want to access already created road lines in the document and we have written .lines as below somewhere we have made class with name lines */
+        //   now we want to move the lines and instead of for loop we can use for each thing 
+        // we have written function inside as it is an ananonymus function and it has no name and it also have some parameter inside it
+       lines.forEach(function(item){
+/* item.y is cars position*/
+        if(item.y>=700){
+            item.y -=750;
+
+        }
+
+   /* Now one time road loop is running but we want it to run continuously*/
+
+           item.y += player.speed; /* the road speed will be same as of our car */
+           item.style.top = item.y + "px";
+       } )   /* we want our road lines to be identitcal and want it to come again and again from top to bottom as if it is moving*/
+
+     }
+
+     function endGame(){          /* We are defining the function endgame */  
+     player.start = false;
+       startScreen.classList.remove('hide');        /*Remove the game playing screen after car collision*/
+
+    }
+
+// want to  move the enemy cars like the road lines
+ //    Defining the function moveEnemy
+    // Now we want our road lines to move
+    function moveEnemy(car){
+          let enemy= document.querySelectorAll('.enemy');  /* As we want to access already created enemy cars in the document and we have written .enemy as below somewhere we have made class with name enemy */
+        //   now we want to move the lines and instead of for loop we can use for each thing 
+        // we have written function inside as it is an ananonymus function and it has no name and it also have some parameter inside it
+       enemy.forEach(function(item){
+
+        if(isCollide(car,item)){
+           console.log("Boom Hit");
+           endGame();  /*endgame function to end the game when player collides with other car */
+        }
+/* item.y is cars position*/
+        if(item.y>=750){
+            item.y =-300;
+            item.style.left = Math.floor(Math.random() * 350) + "px"; 
+
+        }
+
+   /* Now one time road loop is running but we want it to run continuously*/
+
+           item.y += player.speed; /* the road speed will be same as of our car */
+           item.style.top = item.y + "px";
+       } )   /* we want our road lines to be identitcal and want it to come again and again from top to bottom as if it is moving*/
+
+     }
+
+
+
+
+
+
+
+
+    //  window.requestAnimationFrame is a method , inside same function we can run loop multiple times.
+//   By default we have a window object in javascript
+// window.requestAnimationFrame (step);  step means we have to write that function name which we want to invoke or call, basically it is a call back function
+
+
+// Below we are defining the function gamePlay 
+function gamePlay(){
+    // console.log("Hey I am clicked.");
+    // We again have to define the car and need to take the value of the car
+    let car = document.querySelector('.car');
+
+/*Our car is going out of the game and to stop this first we should know the total height and width of the road, left and right position of the road*/
+/* To solve the above issue we have a property called  Element.getBoundingClientRect() */
+
+let road = gameArea.getBoundingClientRect();
+// console.log(road);
+
+    
+
+    if(player.start){ /* this automatically means that player.start is equal to true */
+       
+//   calling a function called moveLines
+moveLines();
+moveEnemy(car);
+
+        if(keys.ArrowUp && player.y > (road.top + 70)) { player.y -=player.speed}  /* we are simply increaing the speed by 5 when ArrowUp key is pressed */
+        if(keys.ArrowDown && player.y < (road.bottom - 85)) { player.y+=player.speed}
+        if(keys.ArrowLeft && player.x > 0) { player.x -=player.speed} /* we added 0 in the condition as when the game starts the car comes at the bottom which we are saying as the 0 position so when the user presses left key then obviously we should not let it go more left otherwise it wil cross the left border */
+        if(keys.ArrowRight && player.x < (road.width - 50)) { player.x +=player.speed}
+    //    Now we will use CSS inside the javascript
+    car.style.top = player.y + "px";
+    car.style.left = player.x + "px";
+        window.requestAnimationFrame(gamePlay); /*we are pasting the function itselt in the place from where we are calling it so that we can get a repeated running animation of roads and cars*/
+   console.log( player.score++);  /* already in line no. 63 we have given score as 0 for the starting of the game and now we are incrementing the score here  */
+   player.score++;
+   score.innerText = "Score:" + player.score; /*To display player score on the left side of the screen */
+
+}
+   }  /*The above 5-6 lines means that if the player is ready to play the game then only start the game*/
+
+
+function start(){   /*we need continuation cars and road animation*/
+//    gameArea.classList.remove('hide'); 
+   startScreen.classList.add('hide'); /* Basically once the click on start, we are hiding the start screen and displaying the gameArea*/
+  gameArea.innerHTML = "";
+   player.start= true; /*we know that in javascript everything `is an object and by using dot . we can mention any property whose value we have given true*/
+    /* or in simple words the above lines means that if player wants to play or not and the answer is true that is it is confirmed that the player wants to play*/
+     player.score = 0;  /* setting the initial score as zero*/
+    window.requestAnimationFrame(gamePlay); /* we are calling gameplay function instead of start function because game has already been started in the above steps now we have to play the game */
+
+/* will run a for loop to generate multiple road lines */
+ 
+for(x=0; x<5;x++){
+    let roadLine = document.createElement('div');
+    roadLine.setAttribute('class', 'lines'); /*Now we need to make divs 5 times and also we need to set the height/top of the div to the particular range */
+    roadLine.y = (x*150); /* for the speed of moving road lines*/
+    roadLine.style.top = roadLine.y + "px";
+    // roadLine.style.top = (x*150) + "px"; /* x is zero in first iteration so first road line height is (0*150) + 100=  100px */
+    gameArea.appendChild(roadLine);     /* basically in the above line x*150 is the gap between two white lines and "px" is the actual length of the road lines*/
+}
+
+
+
+
+// Creating road line
+// we need to create a div inside the document/ or in gameArea 
+// let roadLine = document.createElement('div');
+// Now we have to add a class or an attribute
+// roadLine.setAttribute('class', 'lines');  /*We are adding class attribute so we wrote 'class' and we gave the name of the class as lines so we wrote 'lines' */
+/*Now we have to check whether the class named car is added or not so we will check by writing this below*/
+// lines.innerText = "Hey I am ur lines";
+/* initially we are already having an element in the very starting(gameArea) and we are trying to add a div in that element so we will write*/
+// gameArea.appendChild(roadLine);
+// roadlines won't be visible so we have to give some css to our road lines
+
+
+// if we need to add any element in the document then write this
+
+let car = document.createElement('div');
+// Now we have to add a class or an attribute
+car.setAttribute('class', 'car');  /*We are adding class attribute so we wrote 'class' and we gave the name of the class as car so we wrote 'car' */
+/*Now we have to check whether the class named car is added or not so we will check by writing this below*/
+// car.innerText = "Hey I am ur Car";
+/* initially we are already having an element in the very starting(gameArea) and we are trying to add a div in that element so we will write*/
+gameArea.appendChild(car);
+
+
+
+// finding the position of players car
+player.x = car.offsetLeft;
+player.y = car.offsetTop;
+
+/* Now we want to know that the red car that we created is on which postion/location according to our whole screen/webpage */
+
+// console.log("top position  " + car.offsetTop); /* This will tell us how much below the red car is from the top of the webpage or the screen */
+// console.log("left position  " + car.offsetLeft); /* This will tell us how much to the right the red car is from the left side of the screen or our webpage */
+
+
+for(x=0; x<3;x++){ /*x<3 because we want only 3 cars*/
+    let enemyCar = document.createElement('div');/* made a div and set it in enemyCar*/
+    enemyCar.setAttribute('class', 'enemy'); /*Now we need to make divs 5 times and also we need to set the height/top of the div to the particular range */
+    enemyCar.y = (x*150); /* for the speed of moving enemy cars*/
+    enemyCar.y = ((x+1) * 350) * -1;  
+    enemyCar.style.top = enemyCar.y + "px";
+    // roadLine.style.top = (x*150) + "px"; /* x is zero in first iteration so first road line height is (0*150) + 100=  100px */
+    enemyCar.style.background = 'randomColor()';
+    // Now we want to show the enemy cars at different places randomly
+    enemyCar.style.left = Math.floor(Math.random() * 350) + "px";   // 350 is taken so that random values atleast don't come in points, we could also have taken any other number than 350
+    gameArea.appendChild(enemyCar);     /* basically in the above line x*150 is the gap between two white lines and "px" is the actual length of the road lines*/
+}}
+ 
+// function randomColor(){
+//     function c(){
+//         let hex= Math.floor(Math.random()*256).toString(16);
+//               return ("0" + String(hex)).substr(-2);   
+//     }
+//     return "#"+c()+c()+c();
+
+// }
+
+
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
